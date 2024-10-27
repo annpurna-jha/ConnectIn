@@ -1,0 +1,19 @@
+{
+  "name": "connectin",
+  "version": "1.0.0",
+  "description": "space for dev",
+  "main": "index.js",
+  "scripts": {
+    "start" : "node src/app.js",
+    "dev" : "nodemon src/app.js"
+  },
+  "keywords": [
+    "nodejs",
+    "javascript"
+  ],
+  "author": "Annpurna Jha",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
