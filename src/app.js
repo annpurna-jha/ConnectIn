@@ -1,20 +1,36 @@
-// starting point of application
-
 const express = require("express");
+const app = express();
 
-const app = express(); //creating instance of express js application or new web server
-
-//handle incoming request
-
-// this use() will get all HTTP methods 
-app.use("/",(req,res)=>{ // as this route handler start with / anything after this will get the same result . it will override all other route and give same result everytime.  for ex - /test
-    res.send("Hello annpurna")
-})
-
-app.use("/test",(req,res)=>{ // as this route handler start with /test anything after this will get the same result . for ex - /test/xyz
+//this will match all the http method api calls to /user. we know order matters a lot so below GET POST API call will never get a chance to execute 
+app.use("/user",(req,res)=>{ 
     res.send("Hello from server")
-})
+});
+
+//this will only handle GET call to /user
+app.get("/user",(req,res)=>{
+    console.log(req.query);//get queryParams into route handler
+    res.send({firstName:"Akshay", lastName:"Saini"});
+});
+
+//makes routes dynamic
+app.get("/user/:userId",(req,res)=>{
+    console.log(req.params);
+    res.send({firstName:"Akshay", lastName:"Saini"});
+});
+
+//makes routes dynamic
+app.get("/user/:userId/:name/:password",(req,res)=>{
+    console.log(req.params);
+    res.send({firstName:"Akshay", lastName:"Saini"});
+});
+
+//this will only handle POST call to /user
+app.post("/user",(req,res)=>{
+    console.log("Save Data to the database");
+    res.send("Data successfully saved to the database")
+});
 
 app.listen(7777,()=>{ // server listen on 7777 port no
     console.log("server is listening");
 });
+
