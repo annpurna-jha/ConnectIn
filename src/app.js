@@ -23,6 +23,21 @@ const app = express();
 // )
 
 
+//above line of code and below code is exact same we have to make sure that route name is same and it will work in same way .one route handling multiple route handler as route name is same
+app.use(
+    "/user",//route
+    (req,res,next)=>{//route handler
+        console.log("Handling the route user1!!");
+        next();
+    })
+app.use(
+        "/user",
+    (req,res,next)=>{
+        console.log("Handling the route user2!!");
+        res.send("2nd Response!!");
+    }
+)
+
 // app.use(
 //     "/user",
 //     (req,res,next)=>{
@@ -73,7 +88,7 @@ app.use(
         console.log("Handling the route user1!!");
         next(); 
     },
-    (req,res,next)=>{
+    (req,res,next)=>{//theses are actually middleware not route handler, route handler is that which send back the response.if it is not sending the response it is a middleware
         console.log("Handling the route user2!!");
         next();
     },
