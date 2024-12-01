@@ -2,19 +2,20 @@ const express = require("express");
 
 const app = express();
 
-app.get("/admin/getAllData",(req,res)=>{
-    //logic of checking is the request is authorized
-    const token ="xyzabc";
-    const isAdminAuthorized = token =="xyz";
-    if(isAdminAuthorized) res.send("All data sent");
-    else res.status(401).send("Unauthorized request");
-})
-app.get("/admin/deleteUser",(req,res)=>{
-    //logic of checking is the request is authorized
+// use of middleware - with help of this we don't have to write login of authentication again and again
+app.use("/admin",(req,res,next)=>{
     const token ="xyz";
     const isAdminAuthorized = token =="xyz";
-    if(isAdminAuthorized) res.send("Deleted a user");
-    else res.status(401).send("Unauthorized request");
+    if(!isAdminAuthorized) res.status(401).send("Unauthorized request");
+    else next();
+})
+
+app.get("/admin/getAllData",(req,res)=>{
+   res.send("All data sent");
+})
+
+app.get("/admin/deleteUser",(req,res)=>{
+    res.send("Deleted a user");
 })
 
 app.listen(7777,()=>{ 
