@@ -52,6 +52,17 @@ app.get("/feed", async (req,res)=>{
     }
 });
 
+// delete user from db
+app.delete("/user", async (req,res)=>{
+    try{
+        const userId = req.body.userId;
+        const user = await User.findByIdAndDelete(userId); // findByIdAndDelete(userId) is shorthand for findByIdAndDelete({_id : userId}) 
+        res.send("User deleted successfully");
+    }catch(err){
+        res.status(400).send("Something went wrong")
+    }
+});
+
 
 
 //connnect, db first, then listing to server.right way to do it
