@@ -54,10 +54,22 @@ app.get("/feed", async (req,res)=>{
 
 // delete user from db
 app.delete("/user", async (req,res)=>{
+    const userId = req.body.userId;
     try{
-        const userId = req.body.userId;
         const user = await User.findByIdAndDelete(userId); // findByIdAndDelete(userId) is shorthand for findByIdAndDelete({_id : userId}) 
         res.send("User deleted successfully");
+    }catch(err){
+        res.status(400).send("Something went wrong")
+    }
+});
+
+// update user 
+app.patch("/user", async (req,res)=>{
+    const userId = req.body.userId;
+    const data = req.body;
+    try{
+        const user = await User.findByIdAndUpdate(userId,data); //findByIdAndUpdate(userId) is shorthand for ffindByIdAndUpdate({_id : userId},data) 
+        res.send("User updated successfully");
     }catch(err){
         res.status(400).send("Something went wrong")
     }
