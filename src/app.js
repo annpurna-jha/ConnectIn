@@ -17,7 +17,7 @@ try {
     await user.save(); //return a promise that's why using async await
     res.send("User added successfully!!");
 } catch (error) {
-    res.status(400).send("User can't be added" + error.message);
+    res.status(400).send("User can't be added: " + error.message);
 }
 
 });
@@ -64,16 +64,23 @@ app.delete("/user", async (req,res)=>{
 });
 
 // update user 
-app.patch("/user", async (req,res)=>{
-    const userId = req.body.userId;
+app.patch("/user/:userId", async (req,res)=>{
+    const userId = req.params?.userId;
     const data = req.body;
     try{
+        const ALLOWED_UPDATES =["firstName","lastName","password","age","gender","about","photoUrl","skills"]; // only these thing can be updated
+        const isUpdateAllowed = Object.keys(data).every((k)=>
+            ALLOWED_UPDATES.includes(k)
+        );
+        if(!isUpdateAllowed){
+            throw new Error("Update not allowed");
+        }
         const user = await User.findByIdAndUpdate(userId,data,{
             runValidators:true // bcz by default validators not run on updating the document
         }); //findByIdAndUpdate(userId) is shorthand for ffindByIdAndUpdate({_id : userId},data) 
         res.send("User updated successfully");
     }catch(err){
-        res.status(400).send("Update failed"+ err.message);
+        res.status(400).send("Update failed: "+ err.message);
     }
 });
 
