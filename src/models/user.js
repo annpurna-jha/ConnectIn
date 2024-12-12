@@ -4,22 +4,31 @@ const userSchema = new mongoose.Schema(
     {
     firstName : {
         type: String,
-        required: true,
-        maxLength:50
+        required: [true, "First name is required"], //msg along with checks
+        minLength: [2, "First name must be at least 2 characters long"],
+        maxLength: [50, "First name must be at most 50 characters long"],
+        trim:true,
     },
     lastName :{
-       type:String,    
+       type:String,  
+       minLength: [2, "Last name must be at least 2 characters long"],
+       maxLength: [50, "Last name must be at most 50 characters long"],
+       trim:true,  
     } ,
     emailId :{
        type:String,
-       required:true,
+       required: [true, "Email is required"],
+       match: [/^\S+@\S+\.\S+$/, "Email must be valid"],
        trim:true,
        unique:true,
-       lowercase:true
+       lowercase:true,
     },
     password:{
         type:String,
-        required:true,
+        required: [true, "Password is required"],
+        minLength: [8, "Password must be at least 8 characters long"],
+        maxLength: [128, "Password must be at most 128 characters long"],
+        trim:true,
     },
     age :{
         type:Number,
@@ -41,10 +50,28 @@ const userSchema = new mongoose.Schema(
     },
     photoUrl:{
         type:String,
-        default:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRm-TruksPXPI5imDL_kfzEfFiAZwg5AzHtWg&s"
+        default:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRm-TruksPXPI5imDL_kfzEfFiAZwg5AzHtWg&s",
+        validate: {
+            validator: function (url) {
+                const isWebUrl = /^(https?:\/\/.*)/.test(url);
+                const isLocalPath = /^([a-zA-Z]:)?(\\[a-zA-Z0-9_-]+)+\\?.*\.(png|jpg|jpeg)$/.test(url) || /^(\/[a-zA-Z0-9_-]+)+\/?.*\.(png|jpg|jpeg)$/.test(url);
+                return isWebUrl || isLocalPath;
+            },
+            message: "Photo URL must be a valid URL"
+        },
     },
     skills:{
-        type:[String]
+        type:[String],
+        validate: {
+            validator: function (skills) {
+                // Check array length and ensure each skill is a trimmed non-empty string
+                return Array.isArray(skills) &&
+                    skills.length > 0 &&
+                    skills.length <= 10 &&
+                    skills.every(skill => skill.trim().length > 0);
+            },
+            message: "Skills must contain at least 1 and at most 10 non-empty items"
+        }
     }
     },
     {
