@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema(
     {
@@ -18,17 +19,22 @@ const userSchema = new mongoose.Schema(
     emailId :{
        type:String,
        required: [true, "Email is required"],
-       match: [/^\S+@\S+\.\S+$/, "Email must be valid"],
        trim:true,
        unique:true,
        lowercase:true,
+       validate(value){
+            if(!validator.isEmail(value)) // using npm validator library
+                throw new Error("Invalid email address: " + value);
+       },
     },
     password:{
         type:String,
         required: [true, "Password is required"],
-        minLength: [8, "Password must be at least 8 characters long"],
-        maxLength: [128, "Password must be at most 128 characters long"],
         trim:true,
+        validate(value){
+            if(!validator.isStrongPassword(value)) // using npm validator library
+                throw new Error("Enter a Strong Passowrd: " + value);
+       },
     },
     age :{
         type:Number,
@@ -51,14 +57,10 @@ const userSchema = new mongoose.Schema(
     photoUrl:{
         type:String,
         default:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRm-TruksPXPI5imDL_kfzEfFiAZwg5AzHtWg&s",
-        validate: {
-            validator: function (url) {
-                const isWebUrl = /^(https?:\/\/.*)/.test(url);
-                const isLocalPath = /^([a-zA-Z]:)?(\\[a-zA-Z0-9_-]+)+\\?.*\.(png|jpg|jpeg)$/.test(url) || /^(\/[a-zA-Z0-9_-]+)+\/?.*\.(png|jpg|jpeg)$/.test(url);
-                return isWebUrl || isLocalPath;
-            },
-            message: "Photo URL must be a valid URL"
-        },
+        validate(value){
+            if(!validator.isURL(value)) // using npm validator library
+                throw new Error("Invalid photo url: " + value);
+       },
     },
     skills:{
         type:[String],
