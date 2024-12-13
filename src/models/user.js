@@ -5,36 +5,28 @@ const userSchema = new mongoose.Schema(
     {
     firstName : {
         type: String,
-        required: [true, "First name is required"], //msg along with checks
-        minLength: [2, "First name must be at least 2 characters long"],
-        maxLength: [50, "First name must be at most 50 characters long"],
+        required: [true, "First name is required!"], //msg along with checks
+        minLength: [2, "First name must be at least 2 characters long!"],
+        maxLength: [50, "First name must be at most 50 characters long!"],
         trim:true,
     },
     lastName :{
        type:String,  
-       minLength: [2, "Last name must be at least 2 characters long"],
-       maxLength: [50, "Last name must be at most 50 characters long"],
+       minLength: [2, "Last name must be at least 2 characters long!"],
+       maxLength: [50, "Last name must be at most 50 characters long!"],
        trim:true,  
     } ,
     emailId :{
        type:String,
-       required: [true, "Email is required"],
+       required: [true, "Email is required!"],
        trim:true,
        unique:true,
        lowercase:true,
-       validate(value){
-            if(!validator.isEmail(value)) // using npm validator library
-                throw new Error("Invalid email address: " + value);
-       },
     },
-    password:{
+    password :{
         type:String,
         required: [true, "Password is required"],
         trim:true,
-        validate(value){
-            if(!validator.isStrongPassword(value)) // using npm validator library
-                throw new Error("Enter a Strong Passowrd: " + value);
-       },
     },
     age :{
         type:Number,
@@ -64,16 +56,16 @@ const userSchema = new mongoose.Schema(
     },
     skills:{
         type:[String],
-        validate: {
-            validator: function (skills) {
-                // Check array length and ensure each skill is a trimmed non-empty string
-                return Array.isArray(skills) &&
-                    skills.length > 0 &&
-                    skills.length <= 10 &&
-                    skills.every(skill => skill.trim().length > 0);
-            },
-            message: "Skills must contain at least 1 and at most 10 non-empty items"
-        }
+        // validate: {
+        //     validator: function (skills) {
+        //         // Check array length and ensure each skill is a trimmed non-empty string
+        //         return Array.isArray(skills) &&
+        //             skills.length > 0 &&
+        //             skills.length <= 10 &&
+        //             skills.every(skill => skill.trim().length > 0);
+        //     },
+        //     message: "Skills must contain at least 1 and at most 10 non-empty items"
+        // }
     }
     },
     {
