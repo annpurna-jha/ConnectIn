@@ -1,6 +1,8 @@
 const express = require("express");
 const connectDB=require('./config/database');
 const User = require('./models/user');
+const {validateSignupData} = require('./utils/validation');
+const bcrypt = require('bcrypt');
 
 const app = express();
 
@@ -8,16 +10,29 @@ app.use(express.json()); // will work for all api bcz route is not given, conver
 
 app.post("/signup",async (req,res)=>{
 
-//    console.log(req.body);//it will show undefined bcz it can't convert json to js object given to postman
+    try {
+        // validate req.body
+        validateSignupData(req);
 
-//creating a new User with the data getting from request
-    const user = new User(req.body);// taking dynamic data from end user here end user here end user is postman
+        const{firstName,lastName,emailId, password} = req.body;
 
-try {
+        // encrypt the password with bcrypt library
+        const hashPassword = await bcrypt.hash(password,10);
+        // console.log(hashPassword);
+
+    //creating a new User with the data getting from request
+    const user = new User({
+        firstName,
+        lastName,
+        emailId,
+        password : hashPassword, // storing encrypted password into password
+    });// taking dynamic data from end user here end user here end user is postman
+
+
     await user.save(); //return a promise that's why using async await
     res.send("User added successfully!!");
 } catch (error) {
-    res.status(400).send("User can't be added: " + error.message);
+    res.status(400).send("ERROR : " + error.message);
 }
 
 });
