@@ -3,10 +3,13 @@ const connectDB=require('./config/database');
 const User = require('./models/user');
 const {validateSignupData} = require('./utils/validation');
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
 app.use(express.json()); // will work for all api bcz route is not given, convert json to js object
+app.use(cookieParser());//able to read cookies back
 
 app.post("/signup",async (req,res)=>{
 
@@ -20,45 +23,79 @@ app.post("/signup",async (req,res)=>{
         const hashPassword = await bcrypt.hash(password,10);
         // console.log(hashPassword);
 
-    //creating a new User with the data getting from request
-    const user = new User({
-        firstName,
-        lastName,
-        emailId,
-        password : hashPassword, // storing encrypted password into password
-    });// taking dynamic data from end user here end user here end user is postman
+        //creating a new User with the data getting from request
+        const user = new User({
+            firstName,
+            lastName,
+            emailId,
+            password : hashPassword, // storing encrypted password into password
+        });// taking dynamic data from end user here end user here end user is postman
 
 
-    await user.save(); //return a promise that's why using async await
-    res.send("User added successfully!!");
-} catch (error) {
-    res.status(400).send("ERROR : " + error.message);
-}
+        await user.save(); //return a promise that's why using async await
+        res.send("User added successfully!!");
+    }catch (error) {
+        res.status(400).send("ERROR : " + error.message);
+    }
 
 });
 
 app.post("/login",async (req,res)=>{
+
     try{
+        // get email id & password from end user
+        const{emailId, password} = req.body;
 
-    // get email id & password from end user
-    const{emailId, password} = req.body;
+        // get email id from db
+        const user = await User.findOne({emailId:emailId});
 
-    // get email id from db
-    const user = await User.findOne({emailId:emailId});
-    // email not present
-    if(!user) throw new Error("Invalid credentials");
-    // compare password
-    const isPasswordValid =await bcrypt.compare(password, user.password);
-    if(isPasswordValid) res.send("Login Successfull!");
-    else throw new Error("Invalid credentials");
+        // email not present
+        if(!user) throw new Error("Invalid credentials");
 
-} catch (error) {
-    res.status(400).send("ERROR : " + error.message);
-}   
-    
+        // compare password
+        const isPasswordValid =await bcrypt.compare(password, user.password);
 
+        if(isPasswordValid){
+            // create a jwt token
+            const token = await jwt.sign({_id:user._id},"Connect@In$790");//hiding user id inside token, and a secret key it can be anything
+            // console.log(token);
 
+            // add the token to cookie and send the response back to the user
+            res.cookie("token",token);
+            res.send("Login Successfull!");
+
+        }else throw new Error("Invalid credentials");
+    }catch (error) {
+        res.status(400).send("ERROR : " + error.message);
+    } 
 })
+
+app.get("/profile", async (req,res)=>{
+
+    try{
+        const cookies = req.cookies;//give all cookies back
+        // console.log(cookies); // don't get cookies to read cookies we need a npm library cookies parser, after using app.use(cookieParser()) now we will get cookies back
+
+        // extract token from cookie
+        const{token} = cookies;
+
+        if(!token) throw new Error("Invalid Token");
+
+        // validate token
+        const decodedMessage = await jwt.verify(token,"Connect@In$790");
+        
+        const {_id} = decodedMessage;
+        // console.log("Logged in user is: "+ _id);
+
+        const user = await User.findById(_id);
+        
+        if(!user) throw new Error("User does not exist");
+
+        res.send(user);
+    } catch (error) {
+        res.status(400).send("ERROR : " + error.message);
+    } 
+});
 
 app.get("/user", async (req,res)=>{
 
