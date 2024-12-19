@@ -4,7 +4,6 @@ const User = require('./models/user');
 const {validateSignupData} = require('./utils/validation');
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
 const { userAuth } = require("./middlewares/auth");
 
 const app = express();
@@ -54,15 +53,17 @@ app.post("/login",async (req,res)=>{
         if(!user) throw new Error("Invalid credentials");
 
         // compare password
-        const isPasswordValid =await bcrypt.compare(password, user.password);
+        const isPasswordValid =await user.validatePassword(password); // schema methods
 
         if(isPasswordValid){
-            // create a jwt token
-            const token = await jwt.sign({_id:user._id},"Connect@In$790");//hiding user id inside token, and a secret key it can be anything
-            // console.log(token);
+            // jwt token
+            const token = await user.getJWT(); //schema methods, good practice
 
             // add the token to cookie and send the response back to the user
-            res.cookie("token",token);
+            res.cookie("token",token, 
+                {expires:new Date(Date.now() +  7 * 24 * 60 * 60 * 1000)}// 7 days from now
+                // {maxAge: 5000}
+            );
             res.send("Login Successfull!");
 
         }else throw new Error("Invalid credentials");
@@ -81,6 +82,12 @@ app.get("/profile",userAuth, async (req,res)=>{
         res.status(400).send("ERROR : " + error.message);
     } 
 });
+
+app.post("/sendConnectionRequest", userAuth, async (req,res)=>{
+
+    const user = req.user;
+    res.send(user.firstName+ " Sent the Connection request!!");
+})
 
 app.get("/user", async (req,res)=>{
 
