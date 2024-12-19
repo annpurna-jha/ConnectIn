@@ -5,6 +5,7 @@ const {validateSignupData} = require('./utils/validation');
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
+const { userAuth } = require("./middlewares/auth");
 
 const app = express();
 
@@ -70,27 +71,11 @@ app.post("/login",async (req,res)=>{
     } 
 })
 
-app.get("/profile", async (req,res)=>{
+app.get("/profile",userAuth, async (req,res)=>{
 
     try{
-        const cookies = req.cookies;//give all cookies back
-        // console.log(cookies); // don't get cookies to read cookies we need a npm library cookies parser, after using app.use(cookieParser()) now we will get cookies back
 
-        // extract token from cookie
-        const{token} = cookies;
-
-        if(!token) throw new Error("Invalid Token");
-
-        // validate token
-        const decodedMessage = await jwt.verify(token,"Connect@In$790");
-        
-        const {_id} = decodedMessage;
-        // console.log("Logged in user is: "+ _id);
-
-        const user = await User.findById(_id);
-        
-        if(!user) throw new Error("User does not exist");
-
+        const user = req.user;
         res.send(user);
     } catch (error) {
         res.status(400).send("ERROR : " + error.message);
