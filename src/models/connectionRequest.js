@@ -29,6 +29,9 @@ connectionRequestSchema.pre("save", function(next){ // run before saving into db
     next();
 })
 
+// compound index
+connectionRequestSchema.index({fromUserId:1, toUserId:1});// will make quesry fast
+
 const ConnectionRequestModel = mongoose.model("ConnectionRequest",connectionRequestSchema);
 
 module.exports = ConnectionRequestModel;
